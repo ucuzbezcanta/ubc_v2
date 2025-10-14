@@ -28,7 +28,7 @@ export default async function FeaturedProducts() {
         {products.map((product) => (
           <Link
             key={product.id}
-            href={`/urun/${product.slug}`} // Detay sayfası linki
+            href={`/urunler/${product.slug}`} // Detay sayfası linki
             className="flex-shrink-0 w-44 md:w-auto group block"
           >
             {/* Ürün Görseli (Kare içinde) */}
