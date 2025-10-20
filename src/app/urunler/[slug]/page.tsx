@@ -1,9 +1,10 @@
+import type { Metadata, ResolvingMetadata } from 'next';
 import { supabase } from "../../../../lib/supabaseClient";
 import { notFound } from "next/navigation";
 import ProductGallery from "@/components/ProductGallery";
-import Link from "next/link";
+import Link from "next/link"; // Link bileşeni kullanılmış
 
-export const revalidate = 600;
+export const revalidate = 600; // Sayfayı 10 dakikada bir yeniden doğrulayın
 
 // ------------------ TİPLER ------------------
 interface ProcessedProduct {
@@ -24,15 +25,21 @@ interface ProductPageParams {
 }
 
 // ------------------ VERİ ÇEKME ------------------
+// Bu fonksiyon, hem generateMetadata hem de ProductDetailPage component'i tarafından kullanılır.
 async function getProductDetail(slug: string): Promise<ProcessedProduct | null> {
   const { data: productData, error: productError } = await supabase
     .from("products")
-    .select("*, main_image_url, gallery_image_urls, category_id(name, slug)")
+    // foreign table'dan category bilgilerini çekmek için 'category_id!inner(name, slug)' kullanıldı
+    .select("*, main_image_url, gallery_image_urls, category_id!inner(name, slug)")
     .eq("slug", slug)
     .single();
 
-  if (productError || !productData) return null;
+  if (productError || !productData) {
+    console.error("Ürün çekme hatası:", productError?.message);
+    return null;
+  }
 
+  // Supabase'den gelen JOIN verisini doğru tipe dönüştür
   const categoryInfo = productData.category_id as {
     name: string;
     slug: string;
@@ -44,9 +51,11 @@ async function getProductDetail(slug: string): Promise<ProcessedProduct | null> 
   let galleryUrls: string[] = [];
   const galleryData = productData.gallery_image_urls;
 
+  // Veritabanındaki array/jsonb yapısının doğru parse edilmesi
   if (Array.isArray(galleryData)) {
     galleryUrls = galleryData;
   } else if (typeof galleryData === "string" && galleryData.length > 0) {
+    // String'den array'e dönüştürme mantığı korunuyor
     let cleanString = galleryData.trim().replace(/['"{}*]/g, "");
     if (cleanString.startsWith("{") && cleanString.endsWith("}")) {
       cleanString = cleanString.slice(1, -1).trim();
@@ -74,24 +83,68 @@ async function getProductDetail(slug: string): Promise<ProcessedProduct | null> 
   };
 }
 
-// ------------------ METADATA ------------------
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<ProductPageParams>;
-}) {
-  const { slug } = await params;
+
+// ------------------ DİNAMİK METADATA OLUŞTURUCU (SEO) ------------------
+type GenerateMetadataProps = {
+    params: ProductPageParams;
+    parent: ResolvingMetadata;
+};
+
+export async function generateMetadata(
+  { params }: GenerateMetadataProps
+): Promise<Metadata> {
+  // Hata Düzeltildi: params doğrudan { slug: string } objesi olarak kullanılıyor
+  const { slug } = params; 
+  
   const product = await getProductDetail(slug);
 
-  if (!product) return { title: "Ürün Bulunamadı" };
+  if (!product) {
+      return { 
+          title: "Ürün Bulunamadı | Ucuz Bez Çanta",
+          description: "Aradığınız bez çanta modeline ulaşılamadı. Lütfen ürün kataloğumuzu inceleyin."
+      };
+  }
 
-  const description =
-    product.description?.slice(0, 150) || `${product.name} hakkında detaylı bilgi.`;
+  const categoryName = product.categoryName || "Çanta";
+  const safeDescription = product.description || `Toptan ${product.name} modelimiz. Detaylı bilgi için bize ulaşın.`;
+    
+  // SEO Başlığı: Anahtar kelimeleri ve markayı içerir
+  const title = `${product.name} Toptan Fiyatları | Baskılı ${categoryName}`;
+  
+  // SEO Açıklaması: İlk 150-160 karakteri kullanılır ve Call-to-Action eklenir.
+  const description = `${safeDescription.substring(0, 150)}... En uygun toptan fiyatları ve baskı seçeneklerini hemen keşfedin.`;
+
 
   return {
-    title: `${product.name} | UcuzBezCanta`,
-    description,
-    openGraph: { images: [product.mainImageUrl] },
+    title: title,
+    description: description,
+    
+    // Canonical URL (URL'nin doğru versiyonunu belirtir)
+    alternates: {
+        canonical: `/urun/${slug}`, 
+    },
+
+    // Open Graph (Sosyal Medya Paylaşımı)
+    // DÜZELTME: TİP HATASINI GİDERMEK İÇİN type 'product' yerine 'website' kullanıldı
+    // Not: Next.js'in standart tip tanımında 'product' bulunmadığı için 'website' kullanılması en güvenli yoldur.
+    openGraph: {
+      title: title,
+      description: description,
+      url: `/urun/${slug}`, 
+      type: 'website', 
+      images: [
+        {
+          url: product.mainImageUrl, 
+          width: 800,
+          height: 600,
+          alt: product.name,
+        },
+      ],
+    },
+    // Twitter kartları için OpenGraph'i kullanabilir
+    twitter: {
+        card: 'summary_large_image',
+    }
   };
 }
 
@@ -99,9 +152,9 @@ export async function generateMetadata({
 export default async function ProductDetailPage({
   params,
 }: {
-  params: Promise<ProductPageParams>;
+  params: ProductPageParams; // Hata Düzeltildi: Promise kaldırıldı
 }) {
-  const { slug } = await params;
+  const { slug } = params;
   const product = await getProductDetail(slug);
 
   if (!product) notFound();

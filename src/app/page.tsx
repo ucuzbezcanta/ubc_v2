@@ -1,6 +1,7 @@
 import { supabase } from "../../lib/supabaseClient";
 
 import Slider from "@/components/Slider";
+import { Metadata } from "next";
 
 import PopularCategories from "@/components/PopularCategories";
 import FeaturedProducts from "@/components/FeaturedProducts";
@@ -15,7 +16,23 @@ interface Slide {
   button_text: string | null;
 }
 
+// --- ANA SAYFAYA ÖZEL METADATA ---
+export const metadata: Metadata = {
+  title: "Anasayfa - Ucuz bez çanta", // layout.tsx'teki template ile birleşerek "Anasayfa | Ucuz Bez Çanta" olur
+  description: "Ucuz bez çanta, kanvas çanta ve ham bez çanta siparişlerinizi toptan fiyatlarla, en kaliteli baskı çözümleriyle hemen alın. Türkiye'nin en hızlı bez çanta üreticisi.",
+ 
+  keywords: ["bez çanta toptan satış", "kanvas çanta imalatı", "promosyon"],
+  
+  openGraph: {
+      type: 'website',
+      description: "Türkiye genelinde toptan bez çanta imalatında lider. Promosyon ve etkinlikleriniz için çözümler. Kaliteyi ucuza alın!",
+  },
+  
 
+  alternates: {
+    canonical: '/', // layout.tsx'te tanımlanan metadataBase'e "/ " ekler
+  }
+};
 
 // Server Component'te (page.tsx) çalışacak veri çekme fonksiyonu
 async function getSlides(): Promise<Slide[]> {

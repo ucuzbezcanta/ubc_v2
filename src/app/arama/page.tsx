@@ -1,40 +1,61 @@
+import type { Metadata } from "next"; // Metadata import edildi
 import { searchProducts, ProductForCategory } from "../../../lib/supabaseClient";
 import ProductListWithMotion from "@/components/ProductListWithMotion";
 import { Search } from "lucide-react";
 
+// DÜZELTME: searchParams tipini basitleştiriyoruz. Next.js App Router
+// searchParams'ı direkt olarak döndürdüğü için Promise'e gerek yoktur.
 interface SearchParams {
   q?: string;
   [key: string]: string | string[] | undefined;
 }
 
-
 interface SearchPageProps {
-  searchParams: Promise<SearchParams>;
+  // DÜZELTME: Artık Promise değil, direkt obje.
+  searchParams: SearchParams; 
 }
 
 
-// METADATA
+// ------------------ METADATA ------------------
 
-export async function generateMetadata({ searchParams }: SearchPageProps) {
-  const resolvedSearchParams = await searchParams;
-  const query = resolvedSearchParams.q || "Tüm";
+export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
+  // DÜZELTME: searchParams artık Promise olmadığı için await kaldırıldı.
+  const query = searchParams.q || "";
+  const displayQuery = query.trim() || "Tüm Ürünler";
+
+  const title = `"${displayQuery}" Arama Sonuçları | UcuzBezCanta`;
+  const description = `"${displayQuery}" kelimesi ile UcuzBezCanta ürünlerinde yapılan en güncel arama sonuçları. Aradığınız toptan bez çanta, kanvas çanta ve promosyon ürünlerini hemen bulun.`;
 
   return {
-    title: `"${query}" Arama Sonuçları | UcuzBezCanta`,
-    description: `"${query}" kelimesi ile UcuzBezCanta ürünlerinde yapılan arama sonuçları.`,
+    title: title,
+    description: description,
+    
+    // ÖNEMLİ: Canonical URL'yi arama sorgusu ile birlikte veriyoruz
+    alternates: {
+        canonical: `/search${query ? `?q=${encodeURIComponent(query)}` : ''}`,
+    },
+    
+    // OpenGraph
+    openGraph: {
+        title: title,
+        description: description,
+        url: `/search${query ? `?q=${encodeURIComponent(query)}` : ''}`,
+        type: 'website',
+    }
   };
 }
 
 
-// SAYFA BİLEŞENİ
+// ------------------ SAYFA BİLEŞENİ ------------------
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const resolvedSearchParams = await searchParams;
-  const query = resolvedSearchParams.q || "";
+  // DÜZELTME: searchParams artık Promise olmadığı için await kaldırıldı.
+  const query = searchParams.q || "";
 
   let products: ProductForCategory[] = [];
 
   if (query.trim()) {
+    // searchProducts fonksiyonunun var olduğu ve ProductForCategory[] döndürdüğü varsayılmıştır.
     const fetchedProducts = await searchProducts(query.trim());
     if (fetchedProducts) {
       products = fetchedProducts;
