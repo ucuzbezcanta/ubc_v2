@@ -1,10 +1,10 @@
-import type { Metadata, ResolvingMetadata } from 'next';
+import type { Metadata } from "next";
 import { supabase } from "../../../../lib/supabaseClient";
 import { notFound } from "next/navigation";
 import ProductGallery from "@/components/ProductGallery";
-import Link from "next/link"; // Link bileşeni kullanılmış
+import Link from "next/link";
 
-export const revalidate = 600; // Sayfayı 10 dakikada bir yeniden doğrulayın
+export const revalidate = 600;
 
 // ------------------ TİPLER ------------------
 interface ProcessedProduct {
@@ -20,16 +20,12 @@ interface ProcessedProduct {
   categorySlug: string | null;
 }
 
-interface ProductPageParams {
-  slug: string;
-}
+
 
 // ------------------ VERİ ÇEKME ------------------
-// Bu fonksiyon, hem generateMetadata hem de ProductDetailPage component'i tarafından kullanılır.
 async function getProductDetail(slug: string): Promise<ProcessedProduct | null> {
   const { data: productData, error: productError } = await supabase
     .from("products")
-    // foreign table'dan category bilgilerini çekmek için 'category_id!inner(name, slug)' kullanıldı
     .select("*, main_image_url, gallery_image_urls, category_id!inner(name, slug)")
     .eq("slug", slug)
     .single();
@@ -39,23 +35,16 @@ async function getProductDetail(slug: string): Promise<ProcessedProduct | null> 
     return null;
   }
 
-  // Supabase'den gelen JOIN verisini doğru tipe dönüştür
-  const categoryInfo = productData.category_id as {
-    name: string;
-    slug: string;
-  } | null;
-
+  const categoryInfo = productData.category_id as { name: string; slug: string } | null;
   const categoryName = categoryInfo?.name || null;
   const categorySlug = categoryInfo?.slug || null;
 
   let galleryUrls: string[] = [];
   const galleryData = productData.gallery_image_urls;
 
-  // Veritabanındaki array/jsonb yapısının doğru parse edilmesi
   if (Array.isArray(galleryData)) {
     galleryUrls = galleryData;
   } else if (typeof galleryData === "string" && galleryData.length > 0) {
-    // String'den array'e dönüştürme mantığı korunuyor
     let cleanString = galleryData.trim().replace(/['"{}*]/g, "");
     if (cleanString.startsWith("{") && cleanString.endsWith("}")) {
       cleanString = cleanString.slice(1, -1).trim();
@@ -84,77 +73,60 @@ async function getProductDetail(slug: string): Promise<ProcessedProduct | null> 
 }
 
 
-// ------------------ DİNAMİK METADATA OLUŞTURUCU (SEO) ------------------
-type GenerateMetadataProps = {
-    params: ProductPageParams;
-    parent: ResolvingMetadata;
-};
-
+// ------------------ DİNAMİK METADATA (SEO) ------------------
 export async function generateMetadata(
-  { params }: GenerateMetadataProps
+  props: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
-  // Hata Düzeltildi: params doğrudan { slug: string } objesi olarak kullanılıyor
-  const { slug } = params; 
-  
+  const { slug } = await props.params;
   const product = await getProductDetail(slug);
 
   if (!product) {
-      return { 
-          title: "Ürün Bulunamadı | Ucuz Bez Çanta",
-          description: "Aradığınız bez çanta modeline ulaşılamadı. Lütfen ürün kataloğumuzu inceleyin."
-      };
+    return {
+      title: "Ürün Bulunamadı | Ucuz Bez Çanta",
+      description:
+        "Aradığınız bez çanta modeline ulaşılamadı. Lütfen ürün kataloğumuzu inceleyin.",
+    };
   }
 
-  const categoryName = product.categoryName || "Çanta";
-  const safeDescription = product.description || `Toptan ${product.name} modelimiz. Detaylı bilgi için bize ulaşın.`;
-    
-  // SEO Başlığı: Anahtar kelimeleri ve markayı içerir
+ const categoryName = product.categoryName || "Çanta";
+  const safeDescription =
+    product.description ||
+    `Toptan ${product.name} modelimiz. Detaylı bilgi için bize ulaşın.`;
+
   const title = `${product.name} Toptan Fiyatları | Baskılı ${categoryName}`;
-  
-  // SEO Açıklaması: İlk 150-160 karakteri kullanılır ve Call-to-Action eklenir.
   const description = `${safeDescription.substring(0, 150)}... En uygun toptan fiyatları ve baskı seçeneklerini hemen keşfedin.`;
 
-
   return {
-    title: title,
-    description: description,
-    
-    // Canonical URL (URL'nin doğru versiyonunu belirtir)
+    title,
+    description,
     alternates: {
-        canonical: `/urun/${slug}`, 
+      canonical: `/urunler/${slug}`,
     },
-
-    // Open Graph (Sosyal Medya Paylaşımı)
-    // DÜZELTME: TİP HATASINI GİDERMEK İÇİN type 'product' yerine 'website' kullanıldı
-    // Not: Next.js'in standart tip tanımında 'product' bulunmadığı için 'website' kullanılması en güvenli yoldur.
     openGraph: {
-      title: title,
-      description: description,
-      url: `/urun/${slug}`, 
-      type: 'website', 
+      title,
+      description,
+      url: `/urunler/${slug}`,
+      type: "website",
       images: [
         {
-          url: product.mainImageUrl, 
+          url: product.mainImageUrl,
           width: 800,
           height: 600,
           alt: product.name,
         },
       ],
     },
-    // Twitter kartları için OpenGraph'i kullanabilir
     twitter: {
-        card: 'summary_large_image',
-    }
+      card: "summary_large_image",
+    },
   };
 }
 
 // ------------------ SAYFA KOMPONENTİ ------------------
-export default async function ProductDetailPage({
-  params,
-}: {
-  params: ProductPageParams; // Hata Düzeltildi: Promise kaldırıldı
-}) {
-  const { slug } = params;
+export default async function ProductDetailPage(
+  props: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await props.params; // artık await gerekiyor
   const product = await getProductDetail(slug);
 
   if (!product) notFound();
@@ -171,10 +143,7 @@ export default async function ProductDetailPage({
       <nav className="text-sm text-gray-500 mb-6" aria-label="Breadcrumb">
         <ol className="list-none p-0 inline-flex">
           <li className="flex items-center">
-            <Link
-              href="/"
-              className="text-indigo-600 hover:text-indigo-800 transition-colors"
-            >
+            <Link href="/" className="text-indigo-600 hover:text-indigo-800">
               Anasayfa
             </Link>
           </li>
@@ -183,7 +152,7 @@ export default async function ProductDetailPage({
               <span className="text-gray-400 mx-2">/</span>
               <Link
                 href={`/kategoriler/${product.categorySlug}`}
-                className="text-indigo-600 hover:text-indigo-800 transition-colors"
+                className="text-indigo-600 hover:text-indigo-800"
               >
                 {product.categoryName}
               </Link>
@@ -225,6 +194,7 @@ export default async function ProductDetailPage({
           <p className="text-4xl font-bold text-indigo-700 mb-6">
             {product.price.toFixed(2)} ₺ den başlayan fiyatlar
           </p>
+
           <p className="text-xl text-gray-700 mb-6">
             Stok Durumu:{" "}
             {product.stock > 0
