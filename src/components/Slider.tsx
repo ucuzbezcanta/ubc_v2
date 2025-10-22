@@ -62,9 +62,9 @@ export default function Slider({ slides }: { slides: Slide[] }) {
             />
 
             {/* Slayt Üzerindeki İçerik */}
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-start p-8 md:p-16">
+            <div className="absolute inset-0  flex items-center justify-start p-8 md:p-16">
               <motion.div
-                className="max-w-xl text-white"
+                className="max-w-xl text-cyan-900"
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
