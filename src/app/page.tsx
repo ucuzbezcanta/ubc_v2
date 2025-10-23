@@ -6,6 +6,9 @@ import { Metadata } from "next";
 import PopularCategories from "@/components/PopularCategories";
 import FeaturedProducts from "@/components/FeaturedProducts";
 
+const SUPABASE_PUBLIC_URL = "https://hpicacbgzxmvvsmwevmc.supabase.co/storage/v1/object/public";
+
+
 interface Slide {
   id: number;
   title: string;
@@ -45,7 +48,12 @@ async function getSlides(): Promise<Slide[]> {
     console.error("Slayt verileri çekilirken hata:", error.message);
     return [];
   }
-  return data as Slide[];
+  return (data ?? []).map((slide) => ({
+    ...slide,
+    image_url: slide.image_url.startsWith("http")
+      ? slide.image_url
+      : `${SUPABASE_PUBLIC_URL}/${slide.image_url}`,
+  })) as Slide[];
 }
 
 export default async function HomePage() {
