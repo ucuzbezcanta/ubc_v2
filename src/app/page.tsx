@@ -6,6 +6,8 @@ import { Metadata } from "next";
 import PopularCategories from "@/components/PopularCategories";
 import FeaturedProducts from "@/components/FeaturedProducts";
 
+import LogoIntro from "@/components/LogoIntro";
+
 const SUPABASE_PUBLIC_URL = "https://hpicacbgzxmvvsmwevmc.supabase.co/storage/v1/object/public";
 
 
@@ -62,6 +64,8 @@ export default async function HomePage() {
  
 
   return (
+    <>
+    <LogoIntro/>
     <main className="pt-16">
       {/* 1. SLAYT BÖLÜMÜ - Çekilen veriyi props olarak aktarıyoruz */}
       <Slider slides={slides} />
@@ -73,5 +77,6 @@ export default async function HomePage() {
       {/* Öne çıkan ürünler */}
       <FeaturedProducts />
     </main>
+  </>
   );
 }
