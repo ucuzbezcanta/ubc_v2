@@ -37,7 +37,7 @@ const LogoIntro = () => {
     >
       <video
         className="logo-video"
-        src="/logo-anim.mp4"
+        src="/ubc_capcut_2.mp4"
         autoPlay
         muted 
         playsInline
