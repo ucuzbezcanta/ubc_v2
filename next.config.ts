@@ -5,16 +5,12 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**.supabase.co", // Tüm supabase alt alan adları
+        hostname: "pub-ce263849f4154be483a563fb232c1dd0.r2.dev",
       },
       {
         protocol: "https",
-        hostname: "**.r2.dev", // Tüm r2.dev alt alan adları (Daha kapsayıcı)
-      },
-      {
-        protocol: "https",
-        hostname: "pub-ce263849f4154be483a563fb232c1dd0.r2.dev", // Sizin özel domaininiz
-      },
+        hostname: "hpicacbgzxmvvsmwevmc.supabase.co",
+      }
     ],
   },
 };
