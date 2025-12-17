@@ -22,6 +22,8 @@ interface ProcessedProduct {
 
 
 
+
+
 // ------------------ VERİ ÇEKME ------------------
 async function getProductDetail(slug: string): Promise<ProcessedProduct | null> {
   const { data: productData, error: productError } = await supabase
