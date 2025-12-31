@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getFeaturedProducts } from "../../lib/supabaseClient";
+import { getImageUrl } from "@/utils/imageHelper";
 
 // Fiyat formatlama yardımcısı
 const formatPrice = (price: number) => {
@@ -33,22 +34,14 @@ export default async function FeaturedProducts() {
           >
             {/* Ürün Görseli (Kare içinde) */}
             <div className="w-full h-60 md:h-80 relative rounded-xl overflow-hidden shadow-md transition duration-300 group-hover:shadow-xl">
-              {/* HATA DÜZELTME BURADA YAPILIYOR */}
-              {product.main_image_url ? (
-                <Image
-                  // src'nin string olduğunu garanti ediyoruz
-                  src={product.main_image_url}
-                  alt={product.name}
-                  fill
-                  sizes="(max-width: 768px) 45vw, 25vw"
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              ) : (
-                // Eğer görsel yoksa, bir placeholder (yer tutucu) göster
-                <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500">
-                  Görsel Yok
-                </div>
-              )}
+              <Image
+                src={getImageUrl(product.main_image_url)}
+                alt={product.name}
+                fill
+                sizes="(max-width: 768px) 45vw, 25vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                unoptimized
+              />
             </div>
 
             {/* Ürün Bilgileri (Görsel Altında) */}
@@ -60,7 +53,7 @@ export default async function FeaturedProducts() {
 
               {/* Fiyat */}
               <p className="text-lg font-bold text-indigo-600 mt-1">
-                {formatPrice(product.price)} 
+                {formatPrice(product.price)}
               </p>
 
             </div>

@@ -8,8 +8,7 @@ import FeaturedProducts from "@/components/FeaturedProducts";
 
 import LogoIntro from "@/components/LogoIntro";
 
-const SUPABASE_PUBLIC_URL = "https://hpicacbgzxmvvsmwevmc.supabase.co/storage/v1/object/public";
-
+import { getImageUrl } from "@/utils/imageHelper";
 
 interface Slide {
   id: number;
@@ -25,14 +24,14 @@ interface Slide {
 export const metadata: Metadata = {
   title: "Anasayfa - Ucuz bez çanta", // layout.tsx'teki template ile birleşerek "Anasayfa | Ucuz Bez Çanta" olur
   description: "Ucuz bez çanta, kanvas çanta ve ham bez çanta siparişlerinizi toptan fiyatlarla, en kaliteli baskı çözümleriyle hemen alın. Türkiye'nin en hızlı bez çanta üreticisi.",
- 
+
   keywords: ["bez çanta toptan satış", "kanvas çanta imalatı", "promosyon"],
-  
+
   openGraph: {
-      type: 'website',
-      description: "Türkiye genelinde toptan bez çanta imalatında lider. Promosyon ve etkinlikleriniz için çözümler. Kaliteyi ucuza alın!",
+    type: 'website',
+    description: "Türkiye genelinde toptan bez çanta imalatında lider. Promosyon ve etkinlikleriniz için çözümler. Kaliteyi ucuza alın!",
   },
-  
+
 
   alternates: {
     canonical: '/', // layout.tsx'te tanımlanan metadataBase'e "/ " ekler
@@ -52,31 +51,29 @@ async function getSlides(): Promise<Slide[]> {
   }
   return (data ?? []).map((slide) => ({
     ...slide,
-    image_url: slide.image_url.startsWith("http")
-      ? slide.image_url
-      : `${SUPABASE_PUBLIC_URL}/${slide.image_url}`,
+    image_url: getImageUrl(slide.image_url),
   })) as Slide[];
 }
 
 export default async function HomePage() {
   // Tüm veri çekme işlemleri burada, Server Component'te yapılıyor
   const slides = await getSlides();
- 
+
 
   return (
     <>
-    <LogoIntro/>
-    <main className="pt-16">
-      {/* 1. SLAYT BÖLÜMÜ - Çekilen veriyi props olarak aktarıyoruz */}
-      <Slider slides={slides} />
+      <LogoIntro />
+      <main className="pt-16">
+        {/* 1. SLAYT BÖLÜMÜ - Çekilen veriyi props olarak aktarıyoruz */}
+        <Slider slides={slides} />
 
 
-      {/* POPULAR KATEGORILER */}
-      <PopularCategories />
+        {/* POPULAR KATEGORILER */}
+        <PopularCategories />
 
-      {/* Öne çıkan ürünler */}
-      <FeaturedProducts />
-    </main>
-  </>
+        {/* Öne çıkan ürünler */}
+        <FeaturedProducts />
+      </main>
+    </>
   );
 }

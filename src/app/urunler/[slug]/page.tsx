@@ -3,6 +3,7 @@ import { supabase } from "../../../../lib/supabaseClient";
 import { notFound } from "next/navigation";
 import ProductGallery from "@/components/ProductGallery";
 import Link from "next/link";
+import { getImageUrl } from "@/utils/imageHelper";
 
 export const revalidate = 600;
 
@@ -20,15 +21,11 @@ interface ProcessedProduct {
   categorySlug: string | null;
 }
 
-
-
-
-
 // ------------------ VERİ ÇEKME ------------------
 async function getProductDetail(slug: string): Promise<ProcessedProduct | null> {
   const { data: productData, error: productError } = await supabase
     .from("products")
-    .select("*, main_image_url, gallery_image_urls, category_id!inner(name, slug)")
+    .select("*, category_id!inner(name, slug)")
     .eq("slug", slug)
     .single();
 
@@ -41,24 +38,27 @@ async function getProductDetail(slug: string): Promise<ProcessedProduct | null> 
   const categoryName = categoryInfo?.name || null;
   const categorySlug = categoryInfo?.slug || null;
 
+  // --- GALERİ MANTIĞINI SADELEŞTİRİYORUZ ---
   let galleryUrls: string[] = [];
-  const galleryData = productData.gallery_image_urls;
 
-  if (Array.isArray(galleryData)) {
-    galleryUrls = galleryData;
-  } else if (typeof galleryData === "string" && galleryData.length > 0) {
-    let cleanString = galleryData.trim().replace(/['"{}*]/g, "");
-    if (cleanString.startsWith("{") && cleanString.endsWith("}")) {
-      cleanString = cleanString.slice(1, -1).trim();
-    }
-    galleryUrls = cleanString
-      .split(",")
-      .map((url) => url.trim())
-      .filter((url) => url.startsWith("http"));
+  // Eğer veri zaten bir dizi ise doğrudan kullan (Yeni sistem)
+  if (Array.isArray(productData.gallery_image_urls)) {
+    galleryUrls = productData.gallery_image_urls.map((url: string) => getImageUrl(url));
   }
-
-  const defaultPlaceholderImage = "/images/placeholder.jpg";
-  const finalMainImageUrl = productData.main_image_url || defaultPlaceholderImage;
+  // Eğer eski veriler yüzünden string geliyorsa (Fallback)
+  else if (typeof productData.gallery_image_urls === "string") {
+    try {
+      // JSON formatındaysa parse et, değilse temizle
+      const parsed = JSON.parse(productData.gallery_image_urls);
+      galleryUrls = Array.isArray(parsed) ? parsed.map((url: string) => getImageUrl(url)) : [];
+    } catch {
+      galleryUrls = productData.gallery_image_urls
+        .replace(/[{}"]/g, "")
+        .split(",")
+        .map((url: string) => url.trim())
+        .map((url: string) => getImageUrl(url));
+    }
+  }
 
   return {
     id: productData.id,
@@ -66,8 +66,8 @@ async function getProductDetail(slug: string): Promise<ProcessedProduct | null> 
     slug: productData.slug,
     description: productData.description,
     price: productData.price,
-    stock: productData.stock,
-    mainImageUrl: finalMainImageUrl,
+    stock: productData.stock || 0,
+    mainImageUrl: getImageUrl(productData.main_image_url),
     galleryImageUrls: galleryUrls,
     categoryName,
     categorySlug,
@@ -90,7 +90,7 @@ export async function generateMetadata(
     };
   }
 
- const categoryName = product.categoryName || "Çanta";
+  const categoryName = product.categoryName || "Çanta";
   const safeDescription =
     product.description ||
     `Toptan ${product.name} modelimiz. Detaylı bilgi için bize ulaşın.`;
@@ -193,10 +193,20 @@ export default async function ProductDetailPage(
             </p>
           )}
 
-          <p className="text-4xl font-bold text-indigo-700 mb-6">
-            {product.price.toFixed(2)} ₺ den başlayan fiyatlar
+          <p className="text-2xl font-bold text-indigo-700 mb-6">
+            Fiyat Teklifi İçin WhatsApp tan Ulaşabilirsiniz.
           </p>
 
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 transform hover:scale-105"
+          >
+            WhatsApp ile Bilgi Al
+          </a>
+          <br />
+          <br />
           <p className="text-xl text-gray-700 mb-6">
             Stok Durumu:{" "}
             {product.stock > 0
@@ -215,14 +225,7 @@ export default async function ProductDetailPage(
             )}
           </div>
 
-          <a
-            href={whatsappLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 transform hover:scale-105"
-          >
-            WhatsApp ile Bilgi Al
-          </a>
+
         </div>
       </div>
     </div>
