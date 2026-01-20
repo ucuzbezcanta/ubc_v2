@@ -81,9 +81,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="tr" className="light" style={{colorScheme: 'light'}}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-black`}
+        style={{ backgroundColor: 'white', color: 'black' }} // Garantiye almak için inline style
       >
       <Script
   strategy="afterInteractive"

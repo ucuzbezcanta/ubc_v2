@@ -51,11 +51,7 @@ export default async function FeaturedProducts() {
                 {product.name}
               </h3>
 
-              {/* Fiyat */}
-              <p className="text-lg font-bold text-indigo-600 mt-1">
-                {formatPrice(product.price)}
-              </p>
-
+             
             </div>
           </Link>
         ))}

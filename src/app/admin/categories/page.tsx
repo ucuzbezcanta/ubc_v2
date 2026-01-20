@@ -9,7 +9,7 @@ export default async function CategoriesPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-black">Kategori Yönetimi</h1>
-        <p className="text-gray-500 text-sm">Ürün gruplarını buradan yönetin.</p>
+        <p className="text-gray-500 text-sm py-10">Ürün gruplarını buradan yönetin.</p>
       </div>
       <CategoryManager categories={categories || []} />
     </div>

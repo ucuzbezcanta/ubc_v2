@@ -13,6 +13,13 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+
+  //LIMIT IMAGE SIZE
+  experimental: {
+    serverActions : {
+      bodySizeLimit: '50mb',
+    },
+  },
 };
 
 export default nextConfig;
