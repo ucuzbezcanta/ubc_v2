@@ -10,6 +10,8 @@ import LogoIntro from "@/components/LogoIntro";
 
 import { getImageUrl } from "@/utils/imageHelper";
 
+import CategorySlider from "@/components/CategorySlider";
+
 interface Slide {
   id: number;
   title: string;
@@ -67,12 +69,12 @@ export default async function HomePage() {
         {/* 1. SLAYT BÖLÜMÜ - Çekilen veriyi props olarak aktarıyoruz */}
         <Slider slides={slides} />
 
-
-        {/* POPULAR KATEGORILER */}
-        <PopularCategories />
-
         {/* Öne çıkan ürünler */}
         <FeaturedProducts />
+
+        {/* POPULAR KATEGORILER */}
+        <CategorySlider />
+
       </main>
     </>
   );

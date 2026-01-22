@@ -13,6 +13,10 @@ import {
   IoChevronDown,
 } from "react-icons/io5";
 
+
+import TopHeader from "./TopHeader";
+
+
 // Tip Tanımlaması: SupabaseClient dosyanızdaki Category arayüzünü kullanın
 interface Category {
   id: string; 
@@ -83,12 +87,14 @@ export default function Header({ serverCategories }: HeaderProps) {
 
   return (
     <>
+   
       <motion.header
         className="bg-white/80 backdrop-blur-md shadow-sm fixed top-0 left-0 right-0 z-50"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 100 }}
       >
+        <TopHeader />
         <div className="container mx-auto p-4 flex items-center justify-between">
           {/* Sol Alan: Logo ve Menüler (Değişmedi) */}
           <div className="flex items-center space-x-6">
