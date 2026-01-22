@@ -22,28 +22,34 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <motion.div
       key={product.id}
-      className=" rounded-lg shadow-xl overflow-hidden bg-white"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.5 }}
-      whileHover={{ scale: 1.05 }} // Hover efekti ekleyelim
-      whileTap={{ scale: 0.95 }}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+      className="group cursor-pointer"
     >
       <Link href={`/urunler/${product.slug}`}>
-        <div className="relative w-full h-48">
+      {/* Görsel Alanı - Dikey Oran (Aspect Ratio) */}
+        <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#F9F9F9]">
           <Image
             src={product.main_image_url || "/placeholder.jpg"}
             alt={product.name}
             fill={true}
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover"
+            sizes="(max-width: 768px) 50vw, 33vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
+          <div className="absolute top-3 right-3">
+             <span className="text-[14px] tracking-widest uppercase font-semibold text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+               İncele
+             </span>
+          </div>
         </div>
-        <div className="p-4">
-          <h2 className="text-xl font-semibold">{product.name}</h2>
-         
+
+        <div className="mt-4 flex flex-col items-start space-y-1 px-1">
+          <h2 className="text-[13px] md:text-sm font-medium text-gray-800 uppercase tracking-tight group-hover:text-gray-500 transition-colors">{product.name}</h2>
         </div>
+        <div className="h-[1px] w-0 bg-black transition-all duration-300 group-hover:w-full"></div>
+        
       </Link>
     </motion.div>
   );

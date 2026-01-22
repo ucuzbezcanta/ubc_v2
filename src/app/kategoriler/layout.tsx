@@ -23,7 +23,7 @@ export default async function CategoriesLayout({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sol Kolon: Kategori Listesi (Sticky Menü) */}
         <aside className="lg:col-span-1 lg:sticky lg:top-24 h-fit border-r pr-6">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">Kategoriler</h2>
+          <h2 className="text-2xl py-8 font-bold mb-4 text-gray-800">Kategoriler</h2>
           <nav className="space-y-2">
             {categories.map((category) => (
               <Link
