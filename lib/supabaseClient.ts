@@ -115,6 +115,26 @@ export async function fetchProductsByCategorySlug(
   return productsData as ProductForCategory[];
 }
 
+
+/**
+ * Aynı kategorideki diğer ürünleri çeker (Mevcut ürünü hariç tutar).
+ */
+export async function fetchRelatedProducts(categoryId: string, currentProductId: string): Promise<ProductForCategory[]> {
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, name, slug, price, main_image_url")
+    .eq("category_id", categoryId)
+    .neq("id", currentProductId) // Mevcut ürünü listeden çıkar
+    .limit(4);
+
+  if (error) {
+    console.error("Benzer ürünler çekme hatası:", error);
+    return [];
+  }
+
+  return data as ProductForCategory[];
+}
+
 /**
  * is_featured = TRUE olan öne çıkan ürünleri ve ilgili kategori bilgilerini çeker.
  * @returns ProductWithCategory[]
@@ -278,3 +298,4 @@ export async function saveContactMessage(name: string, email: string, message: s
 
     return { success: true };
 }
+

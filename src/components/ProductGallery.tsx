@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Yeni prop yapısına uygun arayüz
 interface ProductGalleryProps {
   mainImageUrl: string | null;
-  // Supabase'den gelebilecek undefined/null değerleri kontrol etmek için
-  galleryImageUrls: (string | null | undefined)[]; 
-  productName: string; 
+  galleryImageUrls: (string | null | undefined)[];
+  productName: string;
 }
 
 export default function ProductGallery({
@@ -17,64 +15,89 @@ export default function ProductGallery({
   galleryImageUrls,
   productName,
 }: ProductGalleryProps) {
-  
-  // Tüm URL'leri birleştir
-  const allUrls = [
-    mainImageUrl,
-    ...(galleryImageUrls || [])
-  ].filter((url): url is string => typeof url === 'string' && url.startsWith("http"));
+  // Gereksiz hesaplamaları önlemek için useMemo kullandık
+  const finalUrls = useMemo(() => {
+    const allUrls = [
+      mainImageUrl,
+      ...(galleryImageUrls || [])
+    ].filter((url): url is string => typeof url === 'string' && url.startsWith("http"));
 
-const finalUrls = allUrls.length > 0 ? allUrls : ["/images/placeholder.jpg"];
+    return allUrls.length > 0 ? allUrls : ["/images/placeholder.jpg"];
+  }, [mainImageUrl, galleryImageUrls]);
 
-  // State'i ilk görselle başlatıyoruz
   const [mainImage, setMainImage] = useState(finalUrls[0]);
 
-  // Ürün değişirse veya görseller yüklenirse state'i güncelle
   useEffect(() => {
-    // Dışarıdan gelen görseller değiştiğinde (ürün değişince)
-    // ilk görseli ana görsel yap.
     if (mainImageUrl) {
       setMainImage(mainImageUrl);
-    } else if (finalUrls[0]) {
+    } else {
       setMainImage(finalUrls[0]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mainImageUrl, galleryImageUrls]); // finalUrls yerine ana prop'ları eklemek daha güvenlidir.
+  }, [mainImageUrl, finalUrls]);
 
   return (
-    <div className="md:col-span-3">
-      {/* ANA GÖRSEL */}
-      <div className="relative w-full h-96 sm:h-[500px] bg-gray-50 rounded-xl overflow-hidden mb-4 shadow-sm border border-gray-100">
-        <Image
-          src={mainImage}
-          alt={productName}
-          fill
-          priority
-          className="object-contain p-4"
-          sizes="(max-width: 1024px) 100vw, 50vw"
-        />
-      </div>
-
-      {/* KÜÇÜK GÖRSELLER */}
-      <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
-        {finalUrls.map((url, index) => (
+    <div className="w-full"> {/* Üst katmandaki col-span ile çakışmaması için sadeleştirdik */}
+      
+      {/* ANA GÖRSEL KONTEYNERI */}
+      <div className="relative aspect-square w-full bg-white rounded-3xl overflow-hidden mb-6 shadow-xl shadow-gray-100 border border-gray-100 group">
+        <AnimatePresence mode="wait">
           <motion.div
-            key={index}
-            className={`relative w-20 h-20 flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 transition-all 
-              ${url === mainImage ? "border-indigo-600 ring-2 ring-indigo-100" : "border-gray-200"}`}
-            onClick={() => setMainImage(url)}
-            whileHover={{ scale: 1.05 }}
+            key={mainImage}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="relative w-full h-full"
           >
             <Image
-              src={url} 
-              alt={`${productName} ${index}`}
+              src={mainImage}
+              alt={productName}
               fill
-              sizes="80px"
-              className="object-cover"
+              priority
+              className="object-contain p-6 transition-transform duration-500 group-hover:scale-110"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </motion.div>
+        </AnimatePresence>
+        
+        {/* Görselin üzerine hafif bir overlay (isteğe bağlı) */}
+        <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-black/5 rounded-3xl" />
+      </div>
+
+      {/* KÜÇÜK GÖRSELLER (THUMBNAILS) */}
+      <div className="flex gap-4 overflow-x-auto py-2 px-1 scrollbar-hide select-none">
+        {finalUrls.map((url, index) => (
+          <motion.button
+            key={index}
+            onClick={() => setMainImage(url)}
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.95 }}
+            className={`relative w-20 h-20 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300
+              ${url === mainImage 
+                ? "border-indigo-600 shadow-lg shadow-indigo-100 scale-105" 
+                : "border-transparent hover:border-gray-300 shadow-sm"}`}
+          >
+            <Image
+              src={url}
+              alt={`${productName} thumbnail ${index}`}
+              fill
+              sizes="80px"
+              className={`object-cover ${url === mainImage ? "opacity-100" : "opacity-70 hover:opacity-100"}`}
+            />
+          </motion.button>
         ))}
       </div>
+
+      {/* Stil Notu: Scrollbar-hide için CSS eklenmesi gerekebilir veya standart flex-wrap kullanılabilir */}
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }
