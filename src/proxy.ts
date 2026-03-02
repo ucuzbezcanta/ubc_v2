@@ -9,6 +9,6 @@ export const config = {
   matcher: [
     // /admin ile başlayan tüm yolları bu kontrol mekanizmasına dahil et
     '/admin/:path*',
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/login',
   ],
 }
