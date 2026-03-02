@@ -17,6 +17,8 @@ export async function createProduct(formData: FormData) {
     const stock = parseInt(formData.get('stock') as string) || 0;
     const category_id = formData.get('category_id') as string;
     const description = formData.get('description') as string;
+    const meta_description = formData.get('meta_description') as string;
+    const details_content = formData.get('details_content') as string;
     
     //Dosyaları alalım
     const mainImageFile = formData.get('main_image') as File;
@@ -58,6 +60,8 @@ export async function createProduct(formData: FormData) {
           stock,
           category_id,
           description,
+          meta_description,
+          details_content,
           main_image_url,
           gallery_image_urls: galleryUrls,
           
@@ -110,6 +114,8 @@ export async function updateProduct(id: string, formData: FormData) {
     const stock = parseInt(formData.get('stock') as string) || 0;
     const category_id = formData.get('category_id') as string;
     const description = formData.get('description') as string;
+    const meta_description = formData.get('meta_description') as string;
+    const details_content = formData.get('details_content') as string;
     
     // 1. Ana Görsel Yönetimi
     let main_image_url = formData.get('current_main_image') as string;
@@ -158,6 +164,8 @@ export async function updateProduct(id: string, formData: FormData) {
         stock,
         category_id,
         description,
+        meta_description,
+        details_content,
         main_image_url,
         gallery_image_urls: gallery_image_urls
       })

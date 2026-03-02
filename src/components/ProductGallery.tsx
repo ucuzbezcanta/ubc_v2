@@ -51,7 +51,7 @@ export default function ProductGallery({
           >
             <Image
               src={mainImage}
-              alt={productName}
+              alt={`${productName} - Toptan Baskılı Bez Çanta Modelleri`}
               fill
               priority
               className="object-contain p-6 transition-transform duration-500 group-hover:scale-110"
@@ -79,7 +79,7 @@ export default function ProductGallery({
           >
             <Image
               src={url}
-              alt={`${productName} thumbnail ${index}`}
+              alt={`${productName} detaylı görünüm ${index} - Ucuz Bez Çanta`}
               fill
               sizes="80px"
               className={`object-cover ${url === mainImage ? "opacity-100" : "opacity-70 hover:opacity-100"}`}

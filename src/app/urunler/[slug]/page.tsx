@@ -1,3 +1,4 @@
+import Script from "next/script";
 import type { Metadata } from "next";
 import { fetchRelatedProducts, supabase } from "../../../../lib/supabaseClient";
 import { notFound } from "next/navigation";
@@ -14,6 +15,8 @@ interface ProcessedProduct {
   name: string;
   slug: string;
   description: string | null;
+  meta_description: string | null;
+  details_content: string | null;
   price: number;
   stock: number;
   mainImageUrl: string;
@@ -67,6 +70,8 @@ async function getProductDetail(slug: string): Promise<ProcessedProduct | null> 
     name: productData.name,
     slug: productData.slug,
     description: productData.description,
+    meta_description: productData.meta_description,
+    details_content: productData.details_content,
     price: productData.price,
     stock: productData.stock || 0,
     mainImageUrl: getImageUrl(productData.main_image_url),
@@ -86,30 +91,25 @@ export async function generateMetadata(
   const product = await getProductDetail(slug);
 
   if (!product) {
-    return {
-      title: "Ürün Bulunamadı | Ucuz Bez Çanta",
-      description:
-        "Aradığınız bez çanta modeline ulaşılamadı. Lütfen ürün kataloğumuzu inceleyin.",
-    };
+    return { title: "Ürün Bulunamadı" };
   }
 
-  const categoryName = product.categoryName || "Çanta";
-  const safeDescription =
-    product.description ||
-    `Toptan ${product.name} modelimiz. Detaylı bilgi için bize ulaşın.`;
+  // Özel meta varsa onu kullan, yoksa açıklamadan türet
+  const seoDescription = 
+    product.meta_description || 
+    (product.description ? `${product.description.substring(0, 150)}...` : `Toptan ${product.name} modelimiz.`);
 
-  const title = `${product.name} Toptan Fiyatları | Baskılı ${categoryName}`;
-  const description = `${safeDescription.substring(0, 150)}... En uygun toptan fiyatları ve baskı seçeneklerini hemen keşfedin.`;
+  const title = `${product.name} Toptan Fiyatları | Ucuz Bez Çanta`;
 
   return {
     title,
-    description,
+    description: seoDescription,
     alternates: {
       canonical: `/urunler/${slug}`,
     },
     openGraph: {
       title,
-      description,
+      description: seoDescription,
       url: `/urunler/${slug}`,
       type: "website",
       images: [
@@ -145,8 +145,38 @@ export default async function ProductDetailPage(
   );
   const whatsappLink = `https://wa.me/${whatsappPhoneNumber}?text=${whatsappMessage}`;
 
+
+  const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": product.name,
+      "image": product.mainImageUrl,
+      "description": product.meta_description || product.description,
+      "sku": product.id,
+      "offers": {
+        "@type": "Offer",
+        "url": `https://www.ucuzbezcanta.com/urunler/${slug}`,
+        "priceCurrency": "TRY",
+        "price": product.price,
+        "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        "seller": {
+          "@type": "Organization",
+          "name": "Ucuz Bez Çanta"
+        }
+      }
+    };
+
+
  return (
   <div className="container mx-auto px-4 pt-28 md:pt-32 pb-12 max-w-7xl min-h-screen">
+    {/* Google İçin Ürün Şeması */}
+    <Script 
+      id="product-json-ld"
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+
+
     {/* Breadcrumb - Hafifletilmiş Tasarım */}
     <nav className="text-sm text-gray-400 mb-8 px-1" aria-label="Breadcrumb">
       <ol className="flex items-center space-x-2">
@@ -242,6 +272,21 @@ export default async function ProductDetailPage(
         </div>
       </div>
     </div>
+
+    {/* EKSTRA DETAYLAR VE SEO METNİ */}
+      {product.details_content && (
+        <section className="mt-16 border-t pt-12">
+          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100">
+            <h3 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-3">
+              <span className="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center text-sm">?</span>
+              Ürün Hakkında Daha Fazla Bilgi
+            </h3>
+            <div className="prose prose-indigo max-w-none text-gray-600 leading-relaxed whitespace-pre-line">
+              {product.details_content}
+            </div>
+          </div>
+        </section>
+      )}
     {/* Benzer Ürünler Bölümü */}
     <RelatedProducts products={relatedProducts} />
   </div>

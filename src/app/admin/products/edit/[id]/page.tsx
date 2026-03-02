@@ -9,6 +9,8 @@ interface ProductData {
   name: string;
   slug: string;
   description: string | null;
+  meta_description: string | null;
+  details_content: string | null;
   price: number;
   stock: number | null;
   category_id: string;
@@ -100,6 +102,33 @@ export default async function EditProductPage(props: { params: Promise<{ id: str
             <label className="text-sm font-semibold text-gray-600">Açıklama</label>
             <textarea name="description" defaultValue={product.description || ''} rows={4} className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700">Ekstra Detaylar & SEO Yazısı</label>
+            <textarea
+              name="details_content"
+              defaultValue={product?.details_content || ''} // Edit sayfası için
+              rows={6}
+              placeholder="Yıkama talimatı, kullanım alanları gibi özgün bilgileri buraya girin..."
+              className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none text-black transition-all"
+            ></textarea>
+            <p className="text-xs text-gray-400 italic">Googleda öne çıkmak için buraya en az 200 kelime özgün içerik girmenizi öneririm.</p>
+          </div>
+
+          {/* SEO Açıklaması */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-indigo-600 flex items-center gap-2">
+                SEO Açıklaması (Meta Description)
+                <span className="text-[10px] bg-indigo-100 px-2 py-0.5 rounded">ÖNERİLEN: 150-160 KARAKTER</span>
+              </label>
+              <textarea 
+                name="meta_description" 
+                defaultValue={product.meta_description || ''} 
+                rows={2} 
+                placeholder="Google için kısa özet..."
+                className="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 bg-indigo-50/20" 
+              />
+            </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 border-t pt-8">
             <div className="space-y-4">
