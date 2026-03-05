@@ -270,6 +270,31 @@ export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null
     return data as BlogPost;
 }
 
+
+/**
+ * Yeni blog yazısını veritabanına kaydeder..
+ */
+
+export async function createBlogPost(post: Omit<BlogPost, 'id' | 'published_at'>) {
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .insert([
+      {
+        ...post,
+        published_at: new Date().toISOString(),
+      },
+    ])
+    .select();
+
+  if (error) {
+    console.error("Blog yazısı oluşturma hatası:", error);
+    return { success: false, error: error.message };
+  }
+  return { success: true, data };
+}
+
+
+
 /**
  * İletişim formundan gelen mesajı Supabase'deki 'contact_messages' tablosuna kaydeder.
  * @param name Kullanıcının adı.

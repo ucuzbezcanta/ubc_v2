@@ -8,6 +8,7 @@ export default async function AdminDashboard() {
   const { count: productCount } = await supabase.from('products').select('*', { count: 'exact', head: true });
   const { count: categoryCount } = await supabase.from('categories').select('*', { count: 'exact', head: true });
   const { count: messageCount } = await supabase.from('contact_messages').select('*', {count: 'exact', head: true});
+  const { count: blogCount } = await supabase.from('blog_posts').select('*', {count: 'exact', head: true});
 
   //Son gelen 5 mesajı çekelim
   const { data: recentMessages, error:messageError } = await supabase
@@ -30,6 +31,7 @@ export default async function AdminDashboard() {
   const stats = [
     { name: 'Toplam Ürün', value: productCount || 0, icon: '📦', color: 'bg-blue-500' },
     { name: 'Kategoriler', value: categoryCount || 0, icon: '📁', color: 'bg-purple-500' },
+    { name: 'Blog Yazıları', value: blogCount || 0, icon: '📝', color: 'bg-green-500' },
     { name: 'Gelen Mesajlar', value: messageCount || 0, icon: '📩', color: 'bg-red-500' },
     { name: 'Aktif Kampanyalar', value: 0, icon: '🔥', color: 'bg-orange-500' }, // Statik veya slider tablosundan çekilebilir
     { name: 'Site Trafiği', value: '---', icon: '📈', color: 'bg-green-500' },
@@ -103,9 +105,13 @@ export default async function AdminDashboard() {
             <p className="text-indigo-100 text-sm mb-6">Sık yaptığın işlemlere buradan anında ulaşabilirsin.</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
+            <Link href="/admin/blog" className="bg-white/10 hover:bg-white/20 p-4 rounded-2xl transition-all border border-white/10 text-center font-semibold">
+              📝 Blog Yazısı Yaz
+            </Link>
             <Link href="/admin/products/new" className="bg-white/10 hover:bg-white/20 p-4 rounded-2xl transition-all border border-white/10 text-center font-semibold">
               ➕ Ürün Ekle
             </Link>
+
             <Link href="/admin/categories" className="bg-white/10 hover:bg-white/20 p-4 rounded-2xl transition-all border border-white/10 text-center font-semibold">
               📁 Kategori Ekle / Düzenle
             </Link>
