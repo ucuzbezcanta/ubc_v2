@@ -105,6 +105,7 @@ export default function Header({ serverCategories }: HeaderProps) {
                 alt="Mağaza Logosu"
                 width={120}
                 height={40}
+                style={{height: 'auto'}}
                 className="object-contain"
               />
             </Link>
