@@ -49,7 +49,7 @@ export default function IletisimPage() {
       {/* Harita Bölümü - Tam Genişlik */}
       <section className="w-full h-[450px] bg-gray-100">
         <iframe 
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3009.05389328461!2d28.954052676307366!3d41.04595051710377!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab0056d6fa5ad%3A0x64e792755325c3a3!2sUcuz%20Bez%20%C3%87anta!5e0!3m2!1str!2str!4v1752409927747!5m2!1str!2str"  
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d223.65108713830884!2d28.963724351918!3d41.0454154751579!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab74ff04c4583%3A0x91573f4f28ed4e90!2zUGl5YWxlcGHFn2EsIFBpeWFsZXBhxZ9hIENhZC4gTm86NywgMzQ0NDAgQmV5b8SfbHUvxLBzdGFuYnVs!5e0!3m2!1str!2str!4v1772690729886!5m2!1str!2str"  
           width="100%" 
           height="100%"
           style={{ border: 0 }}

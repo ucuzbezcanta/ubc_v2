@@ -7,6 +7,18 @@ export default async function AdminDashboard() {
   // Veritabanından hızlı istatistikleri çekiyoruz
   const { count: productCount } = await supabase.from('products').select('*', { count: 'exact', head: true });
   const { count: categoryCount } = await supabase.from('categories').select('*', { count: 'exact', head: true });
+  const { count: messageCount } = await supabase.from('contact_messages').select('*', {count: 'exact', head: true});
+
+  //Son gelen 5 mesajı çekelim
+  const { data: recentMessages, error:messageError } = await supabase
+    .from('contact_messages')
+    .select('name, email, created_at')
+    .order('created_at', { ascending: false })
+    .limit(5);
+  
+    if (messageError) {
+      console.error("Mesajlar çekilirken hata oluştu:", messageError.message);
+    }
   
   // En son eklenen 5 ürünü çekelim
   const { data: recentProducts } = await supabase
@@ -18,6 +30,7 @@ export default async function AdminDashboard() {
   const stats = [
     { name: 'Toplam Ürün', value: productCount || 0, icon: '📦', color: 'bg-blue-500' },
     { name: 'Kategoriler', value: categoryCount || 0, icon: '📁', color: 'bg-purple-500' },
+    { name: 'Gelen Mesajlar', value: messageCount || 0, icon: '📩', color: 'bg-red-500' },
     { name: 'Aktif Kampanyalar', value: 0, icon: '🔥', color: 'bg-orange-500' }, // Statik veya slider tablosundan çekilebilir
     { name: 'Site Trafiği', value: '---', icon: '📈', color: 'bg-green-500' },
   ];
@@ -57,6 +70,27 @@ export default async function AdminDashboard() {
               <div key={i} className="p-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
                 <span className="font-medium text-gray-700">{product.name}</span>
                 <span className="text-sm font-bold bg-gray-100 px-3 py-1 rounded-full">{product.price} TL</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Dashboard'da Son Mesajları Gösteren Bölüm */}
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-gray-50 flex justify-between items-center">
+            <h2 className="font-bold text-lg">Son Gelen Mesajlar</h2>
+            <Link href="/admin/messages" className="text-indigo-600 text-sm font-semibold hover:underline">Tümünü Gör</Link>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {recentMessages?.map((msg, i) => (
+              <div key={i} className="p-4 flex justify-between items-center hover:bg-gray-100 transition-colors">
+                <div className="flex flex-col">
+                  <span className="font-medium text-gray-700">{msg.name}</span>
+                  <span className="text-xs text-gray-400">{msg.email}</span>
+                </div>
+                <span className="text-xs text-gray-400">
+                  {new Date(msg.created_at).toLocaleDateString('tr-TR')}
+                </span>
               </div>
             ))}
           </div>

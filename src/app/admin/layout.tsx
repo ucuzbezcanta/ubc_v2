@@ -11,6 +11,7 @@ interface MenuItem {
 export default function AdminLayout({ children }: { children: ReactNode }) {
     const menuItems: MenuItem[] = [
     { name: 'Dashboard', href: '/admin', icon: '📊' },
+    {name: 'Gelen Mesajlar', href: '/admin/messages', icon: '📊'},
     { name: 'Ürünler', href: '/admin/products', icon: '📦' },
     { name: 'Kategoriler', href: '/admin/categories', icon: '📁' },
     { name: 'Slider Ayarları', href: '/admin/slider', icon: '🖼️' },

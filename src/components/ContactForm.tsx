@@ -26,20 +26,37 @@ export default function ContactForm() {
     setStatus('idle');
     
     try {
-        // saveContactMessage çağrısından 'formData.subject' kaldırıldı.
+        // 1. ADIM: Mesajı Supabase'e kaydet
         const result = await saveContactMessage(
             formData.name,
             formData.email,
-            formData.message // Artık sadece 3 parametre gönderiliyor
+            formData.message
         );
 
         if (result.success) {
+            // 2. ADIM: Supabase kaydı başarılıysa Resend API'sini tetikle
+            try {
+                await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: formData.name,
+                        email: formData.email,
+                        message: formData.message,
+                    }),
+                });
+            } catch (emailError) {
+                // E-posta gitmese bile kullanıcıya hata göstermeyebiliriz 
+                // çünkü mesaj veritabanına kaydedildi.
+                console.error('E-posta gönderme hatası:', emailError);
+            }
+
             setStatus('success');
-            // Form temizlenirken 'subject' alanı kaldırıldı
             setFormData({ name: '', email: '', message: '' }); 
         } else {
-            // Hata mesajını daha anlaşılır hale getirelim
-            throw new Error(result.error || 'Mesaj gönderilirken bilinmeyen bir Supabase hatası oluştu.');
+            throw new Error(result.error || 'Mesaj gönderilirken bir hata oluştu.');
         }
 
     } catch (error) {

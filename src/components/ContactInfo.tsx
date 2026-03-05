@@ -18,7 +18,7 @@ export default function ContactInfo() {
           <div>
             <h4 className="font-semibold text-gray-800">Adresimiz</h4>
             <p className="text-gray-600">
-              Fetihtepe Mah. Tepe üstü Sokak No:41A Beyoğlu - İstanbul, Türkiye - Merkez Ofis {/* DÜZELTİLDİ */}
+              Piyalepaşa Mah. Kadınlarçeşmesi Sokak No:4/1 Beyoğlu - İstanbul, Türkiye - Merkez Ofis {/* DÜZELTİLDİ */}
             </p>
           </div>
         </li>
@@ -28,6 +28,12 @@ export default function ContactInfo() {
             <h4 className="font-semibold text-gray-800">Telefon</h4>
             <a href="tel:+902126592530" className="text-blue-600 hover:underline">
               +90 212 659 25 30
+            </a>
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-800">Telefon</h4>
+            <a href="tel:+905339780835" className="text-blue-600 hover:underline">
+              +90 533 978 08 35
             </a>
           </div>
         </li>

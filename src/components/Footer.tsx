@@ -101,13 +101,19 @@ export default function Footer() {
               <div className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 flex-shrink-0 mt-1 text-indigo-200" />
                 <span>
-                  Fetihtepe Mah. Tepe üstü Sokak No:41A Beyoğlu - İstanbul, Türkiye - Merkez Ofis
+                  Piyalepaşa Mh. Kadınlarçeşmesi Sokak No:4/1 Beyoğlu - İstanbul, Türkiye - Merkez Ofis
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-5 h-5 text-indigo-200" />
                 <a href="tel:+902126592530" className="hover:text-white transition-colors">
                   +90 212 659 25 30
+                </a>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Phone className="w-5 h-5 text-indigo-200" />
+                <a href="tel:+905339780835" className="hover:text-white transition-colors">
+                  +90 533 978 08 35
                 </a>
               </div>
               <div className="flex items-center space-x-3">
@@ -136,7 +142,7 @@ export default function Footer() {
         {/* TELİF HAKKI VE ALT BİLGİ */}
         <div className="mt-8 pt-4 text-center text-xs text-gray-500">
           <p>
-            &copy; {currentYear} Promozone E-Ticaret A.Ş. Tüm hakları saklıdır.
+            &copy; {currentYear} Ucuzbezcanta.com - Tüm Hakları Saklıdır. | Tasarım ve Geliştirme: Ucuz Bez Çanta Ekibi
           </p>
         </div>
       </div>
