@@ -12,7 +12,6 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 
-// Slider bileşeninin alacağı veri tipi (Artık props olarak gelecek)
 interface Slide {
   id: number;
   title: string;
@@ -23,7 +22,6 @@ interface Slide {
   button_text: string | null;
 }
 
-// Bileşen artık bir Client Component ve veri props olarak alıyor
 export default function Slider({ slides }: { slides: Slide[] }) {
   if (!slides || slides.length === 0) {
     return (
@@ -47,37 +45,40 @@ export default function Slider({ slides }: { slides: Slide[] }) {
       pagination={{ clickable: true }}
       navigation={true}
       modules={[Autoplay, Pagination, Navigation]}
-      className="w-full h-[500px] md:h-[600px] cursor-grab"
+      className="w-full h-[400px] md:h-[600px] cursor-grab bg-gray-50" // Arka plan rengi eklendi (object-contain boşlukları için)
     >
       {slides.map((slide) => (
         <SwiperSlide key={slide.id}>
-          <div className="relative w-full h-full">
+          <div className="relative w-full h-full flex items-center justify-center">
             <Image
               src={slide.image_url}
               alt={slide.title}
               fill={true}
               priority={true}
-              unoptimized={true} // Supabase R2 veya diğer remote kaynaklar için optimize edilmemiş görüntüleri kullanmak için
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
+              unoptimized={true}
+              // MOBİL ÇÖZÜMÜ: object-cover yerine object-contain yaparak görselin kırpılmasını önledik
+              className="object-contain md:object-cover" 
+              sizes="(max-width: 768px) 100vw, 100vw"
             />
 
-            {/* Slayt Üzerindeki İçerik */}
-            <div className="absolute inset-0  flex items-center justify-start p-8 md:p-16">
+            {/* Slayt Üzerindeki İçerik (Eğer görselin üzerinde yazılarınız varsa) */}
+            <div className="absolute inset-0 flex items-center justify-start p-6 md:p-16 pointer-events-none">
               <motion.div
-                className="max-w-xl text-cyan-900"
+                className="max-w-xl text-cyan-950 pointer-events-auto"
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
               >
-                <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
+                <h1 className="text-2xl md:text-6xl font-extrabold mb-2 md:mb-4 leading-tight drop-shadow-sm">
                   {slide.title}
                 </h1>
-                <p className="text-lg md:text-xl mb-6">{slide.description}</p>
+                {slide.description && (
+                  <p className="text-sm md:text-xl mb-4 md:mb-6 drop-shadow-sm">{slide.description}</p>
+                )}
                 {slide.link_url && (
                   <Link href={slide.link_url}>
                     <motion.button
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300"
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 md:py-3 md:px-8 rounded-full shadow-lg transition duration-300 text-sm md:text-base"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >

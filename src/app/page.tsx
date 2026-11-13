@@ -3,7 +3,6 @@ import { supabase } from "../../lib/supabaseClient";
 import Slider from "@/components/Slider";
 import { Metadata } from "next";
 
-import PopularCategories from "@/components/PopularCategories";
 import FeaturedProducts from "@/components/FeaturedProducts";
 
 import LogoIntro from "@/components/LogoIntro";
@@ -11,6 +10,19 @@ import LogoIntro from "@/components/LogoIntro";
 import { getImageUrl } from "@/utils/imageHelper";
 
 import CategorySlider from "@/components/CategorySlider";
+
+import CampaignPopup from "@/components/CampaignPopup";
+
+
+async function getActivePopup() {
+  const { data } = await supabase
+  .from ("popups")
+  .select("image_url")
+  .eq("is_active", true)
+  .limit(1)
+  .single();
+return data;
+}
 
 interface Slide {
   id: number;
@@ -62,10 +74,12 @@ async function getSlides(): Promise<Slide[]> {
 export default async function HomePage() {
   // Tüm veri çekme işlemleri burada, Server Component'te yapılıyor
   const slides = await getSlides();
+  const activePopup = await getActivePopup();
 
 
   return (
     <>
+    <CampaignPopup imageUrl={activePopup?.image_url} />
       <LogoIntro />
       <main className="pt-16">
         {/* 1. SLAYT BÖLÜMÜ - Çekilen veriyi props olarak aktarıyoruz */}
