@@ -40,6 +40,8 @@ export const metadata: Metadata = {
   }
 };
 
+export const dynamic = 'force-dynamic';
+
 // Server Component'te (page.tsx) çalışacak veri çekme fonksiyonu
 async function getSlides(): Promise<Slide[]> {
   const { data, error } = await supabase
