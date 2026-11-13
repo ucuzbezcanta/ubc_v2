@@ -57,6 +57,7 @@ export default function Slider({ slides }: { slides: Slide[] }) {
               alt={slide.title}
               fill={true}
               priority={true}
+              unoptimized={true} // Supabase R2 veya diğer remote kaynaklar için optimize edilmemiş görüntüleri kullanmak için
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
