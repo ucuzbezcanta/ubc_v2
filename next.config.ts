@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "hpicacbgzxmvvsmwevmc.supabase.co",
+        pathname: "/storage/v1/object/public/**",
         
       }
     ],
@@ -24,3 +25,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+

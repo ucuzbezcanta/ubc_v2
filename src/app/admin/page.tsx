@@ -7,20 +7,20 @@ export default async function AdminDashboard() {
   // Veritabanından hızlı istatistikleri çekiyoruz
   const { count: productCount } = await supabase.from('products').select('*', { count: 'exact', head: true });
   const { count: categoryCount } = await supabase.from('categories').select('*', { count: 'exact', head: true });
-  const { count: messageCount } = await supabase.from('contact_messages').select('*', {count: 'exact', head: true});
-  const { count: blogCount } = await supabase.from('blog_posts').select('*', {count: 'exact', head: true});
+  const { count: proposalCount } = await supabase.from('proposals').select('*', { count: 'exact', head: true });
+  const { count: blogCount } = await supabase.from('blog_posts').select('*', { count: 'exact', head: true });
 
-  //Son gelen 5 mesajı çekelim
-  const { data: recentMessages, error:messageError } = await supabase
-    .from('contact_messages')
-    .select('name, email, created_at')
+  // Son gelen 5 Teklif Talebini çekelim
+  const { data: recentProposals, error: proposalError } = await supabase
+    .from('proposals')
+    .select('id, full_name, quantity, bag_type, color, created_at')
     .order('created_at', { ascending: false })
     .limit(5);
-  
-    if (messageError) {
-      console.error("Mesajlar çekilirken hata oluştu:", messageError.message);
-    }
-  
+
+  if (proposalError) {
+    console.error("Teklifler çekilirken hata oluştu:", proposalError.message);
+  }
+
   // En son eklenen 5 ürünü çekelim
   const { data: recentProducts } = await supabase
     .from('products')
@@ -29,12 +29,10 @@ export default async function AdminDashboard() {
     .limit(5);
 
   const stats = [
+    { name: 'Teklif Talepleri', value: proposalCount || 0, icon: '🛍️', color: 'bg-amber-500' },
     { name: 'Toplam Ürün', value: productCount || 0, icon: '📦', color: 'bg-blue-500' },
     { name: 'Kategoriler', value: categoryCount || 0, icon: '📁', color: 'bg-purple-500' },
     { name: 'Blog Yazıları', value: blogCount || 0, icon: '📝', color: 'bg-green-500' },
-    { name: 'Gelen Mesajlar', value: messageCount || 0, icon: '📩', color: 'bg-red-500' },
-    { name: 'Aktif Kampanyalar', value: 0, icon: '🔥', color: 'bg-orange-500' }, // Statik veya slider tablosundan çekilebilir
-    { name: 'Site Trafiği', value: '---', icon: '📈', color: 'bg-green-500' },
   ];
 
   return (
@@ -49,7 +47,7 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((item) => (
           <div key={item.name} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-5">
-            <div className={`${item.color} w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-gray-200`}>
+            <div className={`${item.color} w-12 h-12 rounded-2xl flex items-center justify-center text-2xl text-white shadow-lg shadow-gray-200`}>
               {item.icon}
             </div>
             <div>
@@ -61,6 +59,42 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Son Gelen Teklif Talepleri */}
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-gray-50 flex justify-between items-center">
+            <h2 className="font-bold text-lg flex items-center gap-2">
+              <span>🛍️</span> Son Teklif Talepleri
+            </h2>
+            <Link href="/admin/proposal" className="text-indigo-600 text-sm font-semibold hover:underline">
+              Tümünü Gör
+            </Link>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {recentProposals && recentProposals.length > 0 ? (
+              recentProposals.map((proposal) => (
+                <div key={proposal.id} className="p-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-800">{proposal.full_name}</span>
+                    <span className="text-xs text-gray-400">
+                      {proposal.bag_type} | {proposal.color}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+                      {proposal.quantity} Adet
+                    </span>
+                    <span className="text-[11px] text-gray-400 mt-1">
+                      {new Date(proposal.created_at).toLocaleDateString('tr-TR')}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="p-6 text-sm text-gray-400 text-center">Henüz teklif talebi yok.</p>
+            )}
+          </div>
+        </div>
+
         {/* Son Eklenen Ürünler Listesi */}
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-gray-50 flex justify-between items-center">
@@ -77,41 +111,22 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        {/* Dashboard'da Son Mesajları Gösteren Bölüm */}
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-50 flex justify-between items-center">
-            <h2 className="font-bold text-lg">Son Gelen Mesajlar</h2>
-            <Link href="/admin/messages" className="text-indigo-600 text-sm font-semibold hover:underline">Tümünü Gör</Link>
-          </div>
-          <div className="divide-y divide-gray-50">
-            {recentMessages?.map((msg, i) => (
-              <div key={i} className="p-4 flex justify-between items-center hover:bg-gray-100 transition-colors">
-                <div className="flex flex-col">
-                  <span className="font-medium text-gray-700">{msg.name}</span>
-                  <span className="text-xs text-gray-400">{msg.email}</span>
-                </div>
-                <span className="text-xs text-gray-400">
-                  {new Date(msg.created_at).toLocaleDateString('tr-TR')}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Hızlı Erişim Menüsü */}
-        <div className="bg-indigo-600 rounded-3xl p-8 text-white shadow-xl shadow-indigo-100 flex flex-col justify-between">
+        <div className="bg-indigo-600 rounded-3xl p-8 text-white shadow-xl shadow-indigo-100 flex flex-col justify-between lg:col-span-2">
           <div>
             <h2 className="text-2xl font-bold mb-2">Hızlı İşlemler</h2>
             <p className="text-indigo-100 text-sm mb-6">Sık yaptığın işlemlere buradan anında ulaşabilirsin.</p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <Link href="/admin/proposals" className="bg-white/20 hover:bg-white/30 p-4 rounded-2xl transition-all border border-white/20 text-center font-bold">
+              🛍️ Teklif Taleplerini Gör
+            </Link>
             <Link href="/admin/blog" className="bg-white/10 hover:bg-white/20 p-4 rounded-2xl transition-all border border-white/10 text-center font-semibold">
               📝 Blog Yazısı Yaz
             </Link>
             <Link href="/admin/products/new" className="bg-white/10 hover:bg-white/20 p-4 rounded-2xl transition-all border border-white/10 text-center font-semibold">
               ➕ Ürün Ekle
             </Link>
-
             <Link href="/admin/categories" className="bg-white/10 hover:bg-white/20 p-4 rounded-2xl transition-all border border-white/10 text-center font-semibold">
               📁 Kategori Ekle / Düzenle
             </Link>
