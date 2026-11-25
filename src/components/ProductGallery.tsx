@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import SafeImage from "./SafeImage";
 
 interface ProductGalleryProps {
   mainImageUrl: string | null;
@@ -15,12 +15,10 @@ export default function ProductGallery({
   galleryImageUrls,
   productName,
 }: ProductGalleryProps) {
-  // Gereksiz hesaplamaları önlemek için useMemo kullandık
   const finalUrls = useMemo(() => {
-    const allUrls = [
-      mainImageUrl,
-      ...(galleryImageUrls || [])
-    ].filter((url): url is string => typeof url === 'string' && url.startsWith("http"));
+    const allUrls = [mainImageUrl, ...(galleryImageUrls || [])].filter(
+      (url): url is string => typeof url === "string" && url.startsWith("http")
+    );
 
     return allUrls.length > 0 ? allUrls : ["/images/placeholder.jpg"];
   }, [mainImageUrl, galleryImageUrls]);
@@ -36,8 +34,7 @@ export default function ProductGallery({
   }, [mainImageUrl, finalUrls]);
 
   return (
-    <div className="w-full"> {/* Üst katmandaki col-span ile çakışmaması için sadeleştirdik */}
-      
+    <div className="w-full">
       {/* ANA GÖRSEL KONTEYNERI */}
       <div className="relative aspect-square w-full bg-white rounded-3xl overflow-hidden mb-6 shadow-xl shadow-gray-100 border border-gray-100 group">
         <AnimatePresence mode="wait">
@@ -49,7 +46,7 @@ export default function ProductGallery({
             transition={{ duration: 0.3 }}
             className="relative w-full h-full"
           >
-            <Image
+            <SafeImage
               src={mainImage}
               alt={`${productName} - Toptan Baskılı Bez Çanta Modelleri`}
               fill
@@ -59,9 +56,8 @@ export default function ProductGallery({
             />
           </motion.div>
         </AnimatePresence>
-        
-        {/* Görselin üzerine hafif bir overlay (isteğe bağlı) */}
-        <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-black/5 rounded-3xl" />
+
+        <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-black/5 rounded-3xl z-20" />
       </div>
 
       {/* KÜÇÜK GÖRSELLER (THUMBNAILS) */}
@@ -69,26 +65,30 @@ export default function ProductGallery({
         {finalUrls.map((url, index) => (
           <motion.button
             key={index}
+            type="button"
             onClick={() => setMainImage(url)}
             whileHover={{ y: -4 }}
             whileTap={{ scale: 0.95 }}
             className={`relative w-20 h-20 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300
-              ${url === mainImage 
-                ? "border-indigo-600 shadow-lg shadow-indigo-100 scale-105" 
-                : "border-transparent hover:border-gray-300 shadow-sm"}`}
+              ${
+                url === mainImage
+                  ? "border-indigo-600 shadow-lg shadow-indigo-100 scale-105"
+                  : "border-transparent hover:border-gray-300 shadow-sm"
+              }`}
           >
-            <Image
+            <SafeImage
               src={url}
               alt={`${productName} detaylı görünüm ${index} - Ucuz Bez Çanta`}
               fill
               sizes="80px"
-              className={`object-cover ${url === mainImage ? "opacity-100" : "opacity-70 hover:opacity-100"}`}
+              className={`object-cover ${
+                url === mainImage ? "opacity-100" : "opacity-70 hover:opacity-100"
+              }`}
             />
           </motion.button>
         ))}
       </div>
 
-      {/* Stil Notu: Scrollbar-hide için CSS eklenmesi gerekebilir veya standart flex-wrap kullanılabilir */}
       <style jsx global>{`
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
