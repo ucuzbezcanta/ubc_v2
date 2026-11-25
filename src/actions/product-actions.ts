@@ -5,6 +5,15 @@ import { uploadToR2 } from './r2-upload';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+// Ürün işlemlerinden sonra vitrin sayfalarını yeniler
+function revalidateStorefront() {
+  revalidatePath('/');
+  revalidatePath('/products');
+  revalidatePath('/products/[slug]', 'page');
+  revalidatePath('/kategoriler/[slug]', 'page');
+  revalidatePath('/admin/products');
+}
+
 
 export async function createProduct(formData: FormData) {
   const supabase = await createClient();
@@ -71,7 +80,7 @@ export async function createProduct(formData: FormData) {
     if (error) throw error;
     success = true;
 
-    revalidatePath('/products');
+    revalidateStorefront();
   } catch (error) {
     console.error("KRİTİK HATA:", error);
     return { success: false, error: "Kayıt sırasında bir hata oluştu." };
@@ -96,7 +105,7 @@ export async function deleteProduct(id: string) {
       throw error;
     }
 
-      revalidatePath('/admin/products');
+      revalidateStorefront();
       return { success: true };
   } catch (error) {
     console.error("Silme hatası:", error);
@@ -173,8 +182,7 @@ export async function updateProduct(id: string, formData: FormData) {
 
     if (error) throw error;
 
-    revalidatePath('/admin/products');
-    revalidatePath(`/products/${slug}`);
+    revalidateStorefront();
     return { success: true };
   } catch (error) {
     console.error("Güncelleme hatası:", error);

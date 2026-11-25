@@ -6,7 +6,6 @@ import Image, { ImageProps } from "next/image";
 interface SafeImageProps extends Omit<ImageProps, "src" | "onError" | "onLoad"> {
   src?: string | null;
   fallbackSrc?: string;
-  timeoutMs?: number;
 }
 
 export default function SafeImage({
@@ -14,7 +13,6 @@ export default function SafeImage({
   alt,
   className = "",
   fallbackSrc = "/dikiliyor-canta.png",
-  timeoutMs = 15000,
   ...props
 }: SafeImageProps) {
   const [hasError, setHasError] = useState(false);
@@ -25,20 +23,7 @@ export default function SafeImage({
     setHasError(false);
     setFallbackFailed(false);
     setIsLoaded(false);
-
-    if (!src) return;
-
-    const timer = window.setTimeout(() => {
-      setIsLoaded((loaded) => {
-        if (!loaded) {
-          setHasError(true);
-        }
-        return loaded;
-      });
-    }, timeoutMs);
-
-    return () => window.clearTimeout(timer);
-  }, [src, timeoutMs]);
+  }, [src]);
 
   if (!src || hasError) {
     return (
@@ -87,7 +72,10 @@ export default function SafeImage({
         alt={alt}
         className={`${className} ${isLoaded ? "opacity-100" : "opacity-0"} transition-opacity duration-200`}
         onLoad={() => setIsLoaded(true)}
-        onError={() => setHasError(true)}
+        onError={() => {
+          console.warn("[SafeImage] onError:", { alt, src });
+          setHasError(true);
+        }}
         {...props}
       />
     </>
